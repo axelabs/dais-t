@@ -1,0 +1,43 @@
+- set_fact:
+    region:  "eu-west-1"
+
+- name:  Create a VPC
+  ec2_vpc_net:
+    state:       present
+    name:        Andromeda
+    cidr_block:  10.0.0.0/16
+    region:      "{{ region }}"
+    tags:
+      Creator:   Ansible
+    tenancy:     default
+  register:      andromeda
+
+- name: Create Internet Gateway
+  ec2_vpc_igw:
+    vpc_id:    "{{ andromeda.vpc.id }}"
+    state:     present
+  register:    andromeda_wormhole
+
+- name: Create a subnet
+  ec2_vpc_subnet:
+    state:   present
+    vpc_id:  "{{ andromeda.vpc.id }}"
+    cidr:    "10.0.0.0/24"
+    region:  "{{ region }}"
+    az:      "{{ region }}a"
+    resource_tags:
+      Creator: Ansible
+      Name:    SubZero
+  register:    andromeda_subzero
+
+- name: Create a route table
+  ec2_vpc_route_table:
+    vpc_id:  "{{ andromeda.vpc.id }}"
+    region:  "{{ region }}"
+    tags:
+      Name:  "Andromeda's Compass"
+    subnets:
+      - "{{ andromeda_subzero.subnet.id }}"
+    routes:
+      - dest:        "0.0.0.0/0"
+        gateway_id:  "{{ andromeda_wormhole.gateway_id }}"
