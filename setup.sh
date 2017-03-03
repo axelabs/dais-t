@@ -2,7 +2,7 @@
 
 
 # Install dependencies
-sudo apt-get install ansible python-boto awscli jq
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq ansible python-boto awscli jq
 
 # Get redhat's AMI for the exported region
 RHELACC=309956199498
@@ -18,5 +18,25 @@ _EOF
 # Generate RSA key if one does not exist
 [[ -f ~/.ssh/id_rsa ]] || ssh-keygen -qf ~/.ssh/id_rsa -N ""
 
+# Create resources in AWS
+ansible-playbook -i inventory infrastructure.yml -e @vars.yml
+
+# Enable dynamic inventory
+# See https://aws.amazon.com/blogs/apn/getting-started-with-ansible-and-dynamic-amazon-ec2-inventory-management/
+export ANSIBLE_HOST_KEY_CHECKING=False
+export ANSIBLE_HOSTS="./ec2.py"
+export EC2_INI_PATH=./ec2.ini
 # Get the dynamic ec2 inventory script
-wget -q "https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py"
+[[ -f ./ec2.py ]] || {
+  wget -q "https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py"
+  chmod +x ec2.py
+}
+
+SLEEP=5
+echo "Waiting for instance..."
+until ansible  -u ec2-user -m ping tag_aws_autoscaling_groupName_Web_Servers 2>&1|grep -q SUCCESS; do
+  echo -en "${SLEEP}s\t"; sleep $SLEEP
+  SLEEP=$(($SLEEP*2))
+done
+
+ansible-playbook -u ec2-user webservers.yml

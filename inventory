@@ -1,2 +1,2 @@
-[aws-infrastructure]
-aws-infrastructure ansible_connection=local
+[infrastructure]
+infrastructure ansible_connection=local

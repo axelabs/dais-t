@@ -18,8 +18,6 @@
         to_port:  -1
         cidr_ip: 0.0.0.0/0
     rules_egress:
-      - proto: tcp
-        from_port: 0
-        to_port: 0
+      - proto: all
         cidr_ip: 0.0.0.0/0
   register: andromeda_sg_ws

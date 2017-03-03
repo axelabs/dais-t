@@ -1,0 +1,14 @@
+---
+
+# Playbook to configure webservers
+
+- hosts: tag_aws_autoscaling_groupName_Web_Servers
+  become: yes
+  tasks:
+  - name: ensure httpd
+    yum: name=httpd state=latest
+  - name: ensure httpd is running (and enable it at boot)
+    service: name=httpd state=started enabled=yes
+  handlers:
+    - name: restart httpd
+      service: name=httpd state=restarted
