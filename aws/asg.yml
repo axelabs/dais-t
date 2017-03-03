@@ -1,0 +1,22 @@
+- name: Create launch config
+  ec2_lc:
+    name: "Web Servers"
+    image_id: "{{ ec2ami }}"
+    key_name: access
+    region: "{{ region }}"
+    security_groups: "{{ andromeda_sg_ws.group_id }}"
+    instance_type: t2.micro
+    assign_public_ip: yes
+
+- ec2_asg:
+    name: "Web Servers"
+    launch_config_name: "Web Servers"
+    health_check_period: 60
+    health_check_type: ELB
+    replace_all_instances: yes
+    min_size: 1
+    max_size: 2
+    desired_capacity: 1
+    region: "{{ region }}"
+    vpc_zone_identifier: "{{ andromeda_subzero.subnet.id }}"
+

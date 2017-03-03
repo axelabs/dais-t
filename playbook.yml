@@ -1,3 +1,6 @@
-- hosts: aws
-  roles:
-    - vpc
+- hosts: aws-infrastructure
+  tasks:
+    - include: aws/vpc.yml
+    - include: aws/key.yml
+    - include: aws/sg.yml
+    - include: aws/asg.yml

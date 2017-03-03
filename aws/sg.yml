@@ -1,0 +1,25 @@
+- name: Create security group
+  ec2_group:
+    name: web-servers
+    description: "Used for Web Servers"
+    vpc_id: "{{ andromeda.vpc.id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: icmp
+        from_port: 8
+        to_port:  -1
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: tcp
+        from_port: 0
+        to_port: 0
+        cidr_ip: 0.0.0.0/0
+  register: andromeda_sg_ws
