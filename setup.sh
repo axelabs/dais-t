@@ -39,4 +39,5 @@ until ansible  -u ec2-user -m ping tag_aws_autoscaling_groupName_Web_Servers 2>&
   SLEEP=$(($SLEEP*2))
 done
 
+# Configure webservers on the instance
 ansible-playbook -u ec2-user webservers.yml
