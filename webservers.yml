@@ -5,9 +5,9 @@
 - hosts: tag_aws_autoscaling_groupName_Web_Servers
   become: yes
   tasks:
-  - copy: src=./html/index dest=/usr/share/httpd/noindex/index.html
   - name: ensure httpd
     yum: name=httpd state=latest
+  - copy: src=./html/index dest=/usr/share/httpd/noindex/index.html
   - name: ensure httpd is running (and enable it at boot)
     service: name=httpd state=started enabled=yes
   handlers:
