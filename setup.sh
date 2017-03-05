@@ -1,8 +1,25 @@
 #!/bin/bash
 
+# This script installs Ansible and needed dependencies and uses the included playbooks
+# to provision a Web Server in AWS.  For meow details see:
+# https://github.com/axelabs/dais-t
+
+# Ensure we have AWS credentials and region
+for AWSVAR in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION; do
+  [ -v "$AWSVAR" ] || read -p "Please specify the $AWSVAR: " $AWSVAR && export $AWSVAR
+done
 
 # Install dependencies
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq ansible python-boto awscli jq
+
+# Ensure boto knows the region
+ENDPOINTS="/usr/lib/python2.7/dist-packages/boto/endpoints.json"
+CHARTED="`jq -r '.ec2|keys[]' $ENDPOINTS`"
+if ! grep -q "^${AWS_DEFAULT_REGION}$" <<< "$CHARTED"; then
+  echo -e "\nERROR: The $AWS_DEFAULT_REGION region is not defined in $ENDPOINTS. Update boto or use a charted region:"
+  echo $CHARTED 
+  exit 1
+fi
 
 # Get redhat's AMI for the exported region
 RHELACC=309956199498
